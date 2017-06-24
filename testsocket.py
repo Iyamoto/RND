@@ -12,13 +12,12 @@ def getbanner(ip='127.0.0.1', port=21):
         data = s.recv(1024)
     return data.decode('utf-8')
 
-# data = getbanner('127.0.0.1', 21)
-# print('Received', repr(data))
-
 if __name__ == '__main__':
     if os.environ.get('PYCHARM_HOSTED'):
-        data = getbanner()
-        print(data)
+        # data = getbanner()
+        # print(data)
+        ip = socket.gethostbyname('ya.ru')
+        print(ip)
     else:
         fire.Fire(getbanner)
 
