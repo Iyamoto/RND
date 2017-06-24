@@ -16,8 +16,8 @@ if __name__ == '__main__':
     if os.environ.get('PYCHARM_HOSTED'):
         # data = getbanner()
         # print(data)
-        ip = socket.gethostbyname('ya.ru')
-        print(ip)
+        print(socket.gethostbyname('ya.ru'))
+        print(socket.gethostbyaddr('8.8.8.8'))
     else:
         fire.Fire(getbanner)
 
