@@ -11,4 +11,4 @@ def getbanner(ip, port):
     return data
 
 data = getbanner('127.0.0.1', 21)
-print('Received', repr(data))K
+print('Received', repr(data))
