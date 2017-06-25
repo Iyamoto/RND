@@ -1,4 +1,5 @@
 # Working with GeoIP
+# wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
 
 import pygeoip
 import os
