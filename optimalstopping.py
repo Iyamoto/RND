@@ -10,8 +10,6 @@ def genpool(size):
         pool.append(random.randrange(1, 100))
     return pool
 
-
-
 def comparecandidates(c1, c2):
     """Compare candidates"""
     if c1>=c2:
