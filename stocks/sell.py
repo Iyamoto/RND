@@ -11,12 +11,12 @@ import alphaconf
 key = alphaconf.key
 
 
-def check_rsi(symbol='', key='', time=5, treshold=35, points=5):
+def check_rsi(symbol='', key='', time=5, treshold=65, points=5):
     ti = TechIndicators(key=key, output_format='pandas')
     data, meta_data = ti.get_rsi(symbol=symbol, time_period=time)
     rsidata = data.tail(points).to_dict()
     for rsi in rsidata['RSI']:
-        if rsidata['RSI'][rsi] < treshold:
+        if rsidata['RSI'][rsi] > treshold:
             print('RSI ' + str(time), rsi, rsidata['RSI'][rsi])
 
 
@@ -36,18 +36,15 @@ def check_macd(symbol='', key='', interval='daily', points=5):
             last = macd_hist_value
             continue
 
-        if last < 0 and macd_hist_value > 0:
+        if last > 0 and macd_hist_value < 0:
             print('MACD crossed on ' + interval, macd_date, last, macd_hist_value)
             
-        if macd_hist_value > 0 and macddata['MACD'][macd_date] > 0:
-            print('Short grow: MACD and Hist are positive on ' + interval, macd_date, macd_hist_value, macddata['MACD'][macd_date])
-
         last = macd_hist_value
 
 
 # Lets start
 
-for symbol in alphaconf.symbols2buy:
+for symbol in alphaconf.symbols2sell:
     print('====')
     print(symbol)
 
