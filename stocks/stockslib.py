@@ -97,14 +97,55 @@ def check_price_above_sma(type='close', period=50, prices=None):
 def check_price_above_ema(type='close', period=50, prices=None):
     rez = 0
 
-    sma = get_ema_last(pricedata=prices, period=period)
+    ema = get_ema_last(pricedata=prices, period=period)
     price = get_last_price(price=prices, type=type)
 
-    if price > sma:
-        print('BUY: Price is above EMA_' + str(period), price, sma)
+    if price > ema:
+        print('BUY: Price is above EMA_' + str(period), price, ema)
         rez = 1
     return rez
 
+
+def check_ema5_above_ema20(prices=None):
+    ema5 = get_ema_last(pricedata=prices, period=5)
+    ema20 = get_ema_last(pricedata=prices, period=20)
+
+    if ema5 > ema20:
+        print('BUY: EMA5 above EMA20 (shortterm bullish)', ema5, ema20)
+        rez = 1
+    else:
+        print('Warning: EMA5 bellow EMA20', ema5, ema20)
+        rez = -1
+
+    return rez
+
+
+def check_ema20_above_ema50(prices=None):
+    ema20 = get_ema_last(pricedata=prices, period=20)
+    ema50 = get_ema_last(pricedata=prices, period=50)
+
+    if ema20 > ema50:
+        print('BUY: EMA20 above EMA50 (midterm bullish)', ema20, ema50)
+        rez = 1
+    else:
+        print('Warning: EMA20 bellow EMA50', ema20, ema50)
+        rez = -1
+
+    return rez
+
+
+def check_sma20_above_sma100(prices=None):
+    sma20 = get_sma_last(pricedata=prices, period=20)
+    sma100 = get_sma_last(pricedata=prices, period=100)
+
+    if sma20 > sma100:
+        print('BUY: SMA20 above SMA100 (midterm bullish)', sma20, sma100)
+        rez = 1
+    else:
+        print('Warning: SMA20 bellow SMA100', sma20, sma100)
+        rez = -1
+
+    return rez
 
 
 def get_rsi(pricedata=None, type='close', period=5, points=5):
@@ -137,15 +178,15 @@ def check_rsi(points=1, type='close', period=5, prices=None):
     rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
     rez = 0
     buy_treshold = 35
-    sell_treshold = 65
+    sell_treshold = 50
     for rsi in rsidata:
         if rsidata[rsi] < buy_treshold:
             print('BUY: RSI_' + str(period), rsi, rsidata[rsi])
-            rez += 1
+            rez += 3
 
         if rsidata[rsi] > sell_treshold:
             print('Warning: RSI_' + str(period), rsi, rsidata[rsi])
-            rez -= 1
+            rez -= 2
 
     return rez
 
@@ -154,15 +195,15 @@ def check_rsi_sell(points=1, type='close', period=5, prices=None):
     rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
     rez = 0
     sell_treshold = 65
-    buy_treshold = 35
+    buy_treshold = 50
     for rsi in rsidata:
         if rsidata[rsi] > sell_treshold:
             print('SELL: RSI_' + str(period), rsi, rsidata[rsi])
-            rez += 1
+            rez += 3
 
         if rsidata[rsi] < buy_treshold:
             print('Warning: RSI_' + str(period), rsi, rsidata[rsi])
-            rez -= 1
+            rez -= 2
 
     return rez
 
@@ -189,15 +230,18 @@ def check_macd(prices=None):
 
         if last < 0 < macd_hist_value:
             print('BUY: MACD crossed signal line from DOWN', macd_date, last, macd_hist_value)
-            rez += 1
+            rez += 3
 
         if last > 0 > macd_hist_value:
             print('Warning: MACD crossed signal line from UP', macd_date, last, macd_hist_value)
-            rez -= 1
+            rez -= 3
             
         if macd_hist_value > 0 and macddata['MACD'][macd_date] > 0:
             print('Short grows: MACD and Hist are positive', macd_date, macd_hist_value, macddata['MACD'][macd_date])
             grows = 1
+        else:
+            print('Warning: MACD and Hist are negative', macd_date, macd_hist_value, macddata['MACD'][macd_date])
+            grows = -2
 
         last = macd_hist_value
 
