@@ -36,7 +36,7 @@ def get_prices(symbol='', key='', cachedir='cache', cacheage=3600*8):
     ts = TimeSeries(key=key, output_format='pandas')
     data, meta_data = ts.get_daily_adjusted(symbol=symbol, outputsize='compact')
     data.to_csv(filepath)
-    time.sleep(5)
+    time.sleep(10)
 
     return data
 
@@ -199,7 +199,7 @@ def check_rsi_sell(points=1, type='close', period=5, prices=None):
     for rsi in rsidata:
         if rsidata[rsi] > sell_treshold:
             print('SELL: RSI_' + str(period), rsi, rsidata[rsi])
-            rez += 3
+            rez += 4
 
         if rsidata[rsi] < buy_treshold:
             print('Warning: RSI_' + str(period), rsi, rsidata[rsi])
@@ -230,11 +230,11 @@ def check_macd(prices=None):
 
         if last < 0 < macd_hist_value:
             print('BUY: MACD crossed signal line from DOWN', macd_date, last, macd_hist_value)
-            rez += 3
+            rez += 4
 
         if last > 0 > macd_hist_value:
             print('Warning: MACD crossed signal line from UP', macd_date, last, macd_hist_value)
-            rez -= 3
+            rez -= 4
             
         if macd_hist_value > 0 and macddata['MACD'][macd_date] > 0:
             print('Short grows: MACD and Hist are positive', macd_date, macd_hist_value, macddata['MACD'][macd_date])
