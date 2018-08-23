@@ -41,8 +41,8 @@ for item in alphaconf.symbols:
 
     print('Buy advice', buy)
 
-    if buy > 5:
-        tobuy[symbol] = buy
+    if buy > 6:
+        tobuy[symbol] = [buy, lastprice]
 
     if lastprice > price > 0 and (price/lastprice - 1)*100 > 5:
         sell = 0
