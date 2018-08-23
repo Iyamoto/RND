@@ -1,0 +1,4 @@
+# TODO
+
+1. calculate everything from prices to reduce requests to API
+2. price close to sma

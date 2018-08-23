@@ -1,5 +1,5 @@
 """
-Checks for good buy options
+Checks for good sell options
 """
 
 import matplotlib.pyplot as plt
