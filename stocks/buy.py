@@ -18,34 +18,38 @@ timeout = 4
 },
 """
 
-for symbol in alphaconf.symbols:
+for item in alphaconf.symbols:
+    if type(item) == dict:
+        price = list(item.values())[0]
+        symbol = list(item.keys())[0]
+    else:
+        symbol = item
+        price = 0
+
     print('====')
-    print(symbol)
+    print(symbol, price)
 
     prices = stockslib.get_prices(symbol=symbol, key=key)
-    lastprices = stockslib.get_last_prices(pricedata=prices, type='close', points=1)
-    sma20 = stockslib.get_sma(pricedata=prices, type='close', period=20, points=1)
-    print('Last', lastprices)
-    print('SMA20', sma20)
+    lastprice = stockslib.get_last_price(pricedata=prices, type='close')
 
     buy = 0
     buy += stockslib.check_rsi(prices=prices, period=5)
     buy += stockslib.check_rsi(prices=prices, period=14)
 
-    print('Buy advice', buy)
-
-    sell = 0
-    sell += stockslib.check_rsi_sell(prices=prices, period=5)
-    sell += stockslib.check_rsi_sell(prices=prices, period=14)
-
-    print('Sell advice', sell)
-
-    # time.sleep(timeout)
+    buy += stockslib.check_price_close_sma(prices=prices, period=20)
+    buy += stockslib.check_price_close_sma(prices=prices, period=50)
+    buy += stockslib.check_price_close_sma(prices=prices, period=200)
 
     # Check MACD
     # stockslib.check_macd(symbol=symbol, key=alphaconf.key)
     # check_macd(symbol=symbol, key=alphaconf.key, interval='weekly')
 
-    time.sleep(timeout)
+    print('Buy advice', buy)
 
-    # exit()
+    if lastprice > price > 0 and (price/lastprice - 1)*100 > 9:
+        sell = 0
+        sell += stockslib.check_rsi_sell(prices=prices, period=5)
+        sell += stockslib.check_rsi_sell(prices=prices, period=14)
+
+        print('Sell advice', sell)
+        print('Income', (price / lastprice) * 100)
