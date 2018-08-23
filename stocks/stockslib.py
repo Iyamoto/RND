@@ -2,9 +2,11 @@
 Stocks related stuff
 """
 
-import pandas
+import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
+import technical_indicators
+from pprint import pprint
 
 map = dict()
 map['close'] = '4. close'
@@ -32,17 +34,26 @@ def get_sma(pricedata=None, type='close', period=20, points=5):
 def get_rsi(pricedata=None, type='close', period=5, points=5):
     """https://stackoverflow.com/questions/20526414/relative-strength-index-in-python-pandas"""
     data = pricedata[map[type]]
-    delta = data.diff().dropna()
-    up = delta * 0
-    down = up.copy()
-    up[delta > 0] = delta[delta > 0]
-    down[delta < 0] = -delta[delta < 0]
-    roll_up = up.rolling(window=period).mean()
-    roll_down = down.rolling(window=period).mean()
-    RS = roll_up / roll_down
-    RSI = 100.0 - (100.0 / (1.0 + RS))
+    print(data.to_dict())
+    frame = data[data.columns[0]]
+    pprint(frame)
+    exit()
+    # delta = data.diff().dropna()
+    #
+    # up, down = delta.copy(), delta.copy()
+    # up[up < 0] = 0
+    # down[down > 0] = 0
+    #
+    # roll_up = up.rolling(window=period).mean()
+    # roll_down = down.abs().rolling(window=period).mean()
+    #
+    # rs = roll_up / roll_down
+    # rsi = 100.0 - (100.0 / (1.0 + rs))
 
-    return RSI.tail(points).to_dict()
+    rsi = technical_indicators.relative_strength_index(frame, period)
+    print(rsi)
+
+    return rsi.tail(points).to_dict()
 
 
 def check_rsi(symbol='', key='', time=5, points=5, data=None):

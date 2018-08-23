@@ -16,13 +16,24 @@ for symbol in alphaconf.symbols:
     print('====')
     print(symbol)
 
+    prices = stockslib.get_prices(symbol=symbol, key=key)
+    lastprices = stockslib.get_last_prices(pricedata=prices, type='close', points=1)
+    sma20 = stockslib.get_sma(pricedata=prices, type='close', period=20, points=1)
+    rsi14 = stockslib.get_rsi(pricedata=prices, type='close', period=14, points=1)
+    print(lastprices)
+    print(sma20)
+    print(rsi14)
+
+    exit()
+
     try:
 
         prices = stockslib.get_prices(symbol=symbol, key=key)
         lastprices = stockslib.get_last_prices(pricedata=prices, type='close', points=1)
-        sma20 = stockslib.get_sma(pricedata=prices, type='low', period=20, points=1)
+        sma20 = stockslib.get_sma(pricedata=prices, type='close', period=20, points=1)
         rsi14 = stockslib.get_rsi(pricedata=prices, type='close', period=14, points=1)
-        print(lastprices, sma20)
+        print(lastprices)
+        print(sma20)
         print(rsi14)
 
         # Check RSI
