@@ -41,13 +41,13 @@ def get_prices(symbol='', key='', cachedir='cache', cacheage=3600*8):
     return data
 
 
-def get_last_prices(pricedata=None, type='close', points=1):
-    prices = pricedata[map[type]].tail(points)
+def get_last_prices(price=None, type='close', points=1):
+    prices = price[map[type]].tail(points)
     return prices
 
 
-def get_last_price(pricedata=None, type='close'):
-    prices = pricedata[map[type]].tail(1)
+def get_last_price(price=None, type='close'):
+    prices = price[map[type]].tail(1)
     return prices.to_frame().iloc[0, 0]
 
 
@@ -56,14 +56,25 @@ def get_sma(pricedata=None, type='close', period=20, points=1):
     return sma.tail(points)
 
 
+def get_sma_last(pricedata=None, type='close', period=20):
+    sma = get_sma(pricedata=pricedata, type=type, period=period, points=1)
+    sma = sma.to_frame().iloc[0, 0]
+    return sma
+
+
+def get_ema_last(pricedata=None, period=20):
+    ema = technical_indicators.exponential_moving_average(pricedata.reset_index(), period)
+    ema = ema.to_frame()
+    ema = ema.tail(1).iloc[0, 0]
+    return ema
+
+
 def check_price_close_sma(type='close', period=20, prices=None):
     rez = 0
     buy_treshold = 2
 
-    sma = get_sma(pricedata=prices, type=type, period=period, points=1)
-    sma = sma.to_frame().iloc[0, 0]
-
-    price = get_last_price(pricedata=prices, type=type)
+    sma = get_sma_last(pricedata=prices, type=type, period=period)
+    price = get_last_price(price=prices, type=type)
 
     if price > sma and abs(price/sma - 1) * 100 < buy_treshold:
         print('BUY: Price is close to SMA_' + str(period), price, sma)
@@ -71,7 +82,30 @@ def check_price_close_sma(type='close', period=20, prices=None):
     return rez
 
 
+def check_price_above_sma(type='close', period=50, prices=None):
+    rez = 0
+
+    sma = get_sma_last(pricedata=prices, type=type, period=period)
+    price = get_last_price(price=prices, type=type)
+
+    if price > sma:
+        print('BUY: Price is above SMA_' + str(period), price, sma)
+        rez = 1
     return rez
+
+
+def check_price_above_ema(type='close', period=50, prices=None):
+    rez = 0
+
+    sma = get_ema_last(pricedata=prices, period=period)
+    price = get_last_price(price=prices, type=type)
+
+    if price > sma:
+        print('BUY: Price is above EMA_' + str(period), price, sma)
+        rez = 1
+    return rez
+
+
 
 def get_rsi(pricedata=None, type='close', period=5, points=5):
     """https://stackoverflow.com/questions/20526414/relative-strength-index-in-python-pandas"""
@@ -103,10 +137,15 @@ def check_rsi(points=1, type='close', period=5, prices=None):
     rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
     rez = 0
     buy_treshold = 35
+    sell_treshold = 65
     for rsi in rsidata:
         if rsidata[rsi] < buy_treshold:
             print('BUY: RSI_' + str(period), rsi, rsidata[rsi])
-            rez = 1
+            rez += 1
+
+        if rsidata[rsi] > sell_treshold:
+            print('Warning: RSI_' + str(period), rsi, rsidata[rsi])
+            rez -= 1
 
     return rez
 
@@ -115,34 +154,53 @@ def check_rsi_sell(points=1, type='close', period=5, prices=None):
     rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
     rez = 0
     sell_treshold = 65
+    buy_treshold = 35
     for rsi in rsidata:
         if rsidata[rsi] > sell_treshold:
             print('SELL: RSI_' + str(period), rsi, rsidata[rsi])
-            rez = 1
+            rez += 1
+
+        if rsidata[rsi] < buy_treshold:
+            print('Warning: RSI_' + str(period), rsi, rsidata[rsi])
+            rez -= 1
 
     return rez
 
 
-def check_macd(symbol='', key='', interval='daily', points=5):
+def check_macd(prices=None):
     """
     https://mindspace.ru/abcinvest/shozhdenie-rashozhdenie-skolzyashhih-srednih-moving-average-convergence-divergence-macd/
     https://mindspace.ru/abcinvest/aleksandr-elder-o-rashozhdeniyah-tseny-i-macd/
     https://mindspace.ru/30305-kak-ispolzovat-divergentsii-macd-dlya-vyyavleniya-razvorota-na-rynke/
     """
-    ti = TechIndicators(key=key, output_format='pandas')
-    data, meta_data = ti.get_macd(symbol=symbol, interval=interval)
-    macddata = data.tail(points).to_dict()
+    data = technical_indicators.macd(prices.reset_index())
+    data = data.set_index('date')
+    macddata = data.tail(5).to_dict()
+
     last = None
+    rez = 0
+    grows = 0
+
     for macd_date in macddata['MACD_Hist']:
         macd_hist_value = macddata['MACD_Hist'][macd_date]
         if not last:
             last = macd_hist_value
             continue
 
-        if last < 0 and macd_hist_value > 0:
-            print('MACD crossed on ' + interval, macd_date, last, macd_hist_value)
+        if last < 0 < macd_hist_value:
+            print('BUY: MACD crossed signal line from DOWN', macd_date, last, macd_hist_value)
+            rez += 1
+
+        if last > 0 > macd_hist_value:
+            print('Warning: MACD crossed signal line from UP', macd_date, last, macd_hist_value)
+            rez -= 1
             
         if macd_hist_value > 0 and macddata['MACD'][macd_date] > 0:
-            print('Short grow: MACD and Hist are positive on ' + interval, macd_date, macd_hist_value, macddata['MACD'][macd_date])
+            print('Short grows: MACD and Hist are positive', macd_date, macd_hist_value, macddata['MACD'][macd_date])
+            grows = 1
 
         last = macd_hist_value
+
+    return rez + grows
+
+
