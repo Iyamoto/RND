@@ -2,6 +2,11 @@
 Stocks related stuff
 """
 
+import numpy as np
+import time
+import sys
+import os
+# sys.path.insert(0, os.path.abspath('..'))
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
@@ -15,9 +20,23 @@ map['high'] = '2. high'
 map['open'] = '2. open'
 
 
-def get_prices(symbol='', key=''):
+def get_prices(symbol='', key='', cachedir='cache', cacheage=3600*8):
+    if not os.path.isdir(cachedir):
+        os.mkdir(cachedir)
+    filename = symbol + '.csv'
+    filepath = os.path.join(cachedir, filename)
+    if os.path.isfile(filepath):
+        age = time.time() - os.path.getmtime(filepath)
+        if age > cacheage:
+            os.remove(filepath)
+        else:
+            data = pd.read_csv(filepath, index_col='date')
+            return data
+
     ts = TimeSeries(key=key, output_format='pandas')
     data, meta_data = ts.get_daily_adjusted(symbol=symbol, outputsize='compact')
+    data.to_csv(filepath)
+
     return data
 
 
@@ -34,40 +53,51 @@ def get_sma(pricedata=None, type='close', period=20, points=5):
 def get_rsi(pricedata=None, type='close', period=5, points=5):
     """https://stackoverflow.com/questions/20526414/relative-strength-index-in-python-pandas"""
     data = pricedata[map[type]]
-    print(data.to_dict())
-    frame = data[data.columns[0]]
-    pprint(frame)
-    exit()
-    # delta = data.diff().dropna()
-    #
-    # up, down = delta.copy(), delta.copy()
-    # up[up < 0] = 0
-    # down[down > 0] = 0
-    #
-    # roll_up = up.rolling(window=period).mean()
-    # roll_down = down.abs().rolling(window=period).mean()
-    #
-    # rs = roll_up / roll_down
-    # rsi = 100.0 - (100.0 / (1.0 + rs))
 
-    rsi = technical_indicators.relative_strength_index(frame, period)
-    print(rsi)
+    delta = data.diff().dropna()
+
+    up, down = delta.copy(), delta.copy()
+    up[up < 0] = 0
+    down[down > 0] = 0
+
+    roll_up = up.rolling(window=period).mean()
+    roll_down = down.abs().rolling(window=period).mean()
+
+    rs = roll_up / roll_down
+    rsi = 100.0 - (100.0 / (1.0 + rs))
 
     return rsi.tail(points).to_dict()
 
 
-def check_rsi(symbol='', key='', time=5, points=5, data=None):
-    data = get_rsi(symbol='', key='', time=5)
-    rsidata = data.tail(points).to_dict()
+def get_rsi2(pricedata=None, period=5, points=5):
+    """https://stackoverflow.com/questions/20526414/relative-strength-index-in-python-pandas"""
+    rsi2 = technical_indicators.relative_strength_index(pricedata.reset_index(), period)
 
+    return rsi2.tail(points).to_dict()
+
+
+def check_rsi(points=1, type='close', period=5, prices=None):
+    rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
+    rez = 0
     buy_treshold = 35
-    sell_treshold = 65
-    for rsi in rsidata['RSI']:
-        if rsidata['RSI'][rsi] < buy_treshold:
-            print('BUY. RSI ' + str(time), rsi, rsidata['RSI'][rsi])
+    for rsi in rsidata:
+        if rsidata[rsi] < buy_treshold:
+            print('BUY. RSI ' + str(time), rsi, rsidata[rsi])
+            rez = 1
 
-        if rsidata['RSI'][rsi] > sell_treshold:
-            print('SELL. RSI ' + str(time), rsi, rsidata['RSI'][rsi])
+    return rez
+
+
+def check_rsi_sell(points=1, type='close', period=5, prices=None):
+    rsidata = get_rsi(pricedata=prices, type=type, period=period, points=points)
+    rez = 0
+    sell_treshold = 65
+    for rsi in rsidata:
+        if rsidata[rsi] > sell_treshold:
+            print('SELL. RSI ' + str(time), rsi, rsidata[rsi])
+            rez = 1
+
+    return rez
 
 
 def check_macd(symbol='', key='', interval='daily', points=5):

@@ -1,16 +1,22 @@
 """
-Checks for good buy options
+Stocks advisor
 """
 
-import matplotlib.pyplot as plt
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
 import time
 import alphaconf
 import stockslib
 
 key = alphaconf.key
-timeout = 5
+timeout = 4
+
+"""
+"2018-08-23 10:50:34": {
+"RSI": "54.3286"
+},
+"2018-08-22": {
+"RSI": "48.3238"
+},
+"""
 
 for symbol in alphaconf.symbols:
     print('====')
@@ -19,37 +25,27 @@ for symbol in alphaconf.symbols:
     prices = stockslib.get_prices(symbol=symbol, key=key)
     lastprices = stockslib.get_last_prices(pricedata=prices, type='close', points=1)
     sma20 = stockslib.get_sma(pricedata=prices, type='close', period=20, points=1)
-    rsi14 = stockslib.get_rsi(pricedata=prices, type='close', period=14, points=1)
-    print(lastprices)
-    print(sma20)
-    print(rsi14)
+    print('Last', lastprices)
+    print('SMA20', sma20)
 
-    exit()
+    buy = 0
+    buy += stockslib.check_rsi(prices=prices, period=5)
+    buy += stockslib.check_rsi(prices=prices, period=14)
 
-    try:
+    print('Buy advice', buy)
 
-        prices = stockslib.get_prices(symbol=symbol, key=key)
-        lastprices = stockslib.get_last_prices(pricedata=prices, type='close', points=1)
-        sma20 = stockslib.get_sma(pricedata=prices, type='close', period=20, points=1)
-        rsi14 = stockslib.get_rsi(pricedata=prices, type='close', period=14, points=1)
-        print(lastprices)
-        print(sma20)
-        print(rsi14)
+    sell = 0
+    sell += stockslib.check_rsi_sell(prices=prices, period=5)
+    sell += stockslib.check_rsi_sell(prices=prices, period=14)
 
-        # Check RSI
-        # stockslib.check_rsi(symbol=symbol, key=alphaconf.key, time=5)
-        # check_rsi(symbol=symbol, key=alphaconf.key, time=14)
+    print('Sell advice', sell)
 
-        # time.sleep(timeout)
+    # time.sleep(timeout)
 
-        # Check MACD
-        # stockslib.check_macd(symbol=symbol, key=alphaconf.key)
-        # check_macd(symbol=symbol, key=alphaconf.key, interval='weekly')
+    # Check MACD
+    # stockslib.check_macd(symbol=symbol, key=alphaconf.key)
+    # check_macd(symbol=symbol, key=alphaconf.key, interval='weekly')
 
-        time.sleep(timeout)
-    except:
-        print('Something failed')
-        exit()
-        continue
+    time.sleep(timeout)
 
-    exit()
+    # exit()
