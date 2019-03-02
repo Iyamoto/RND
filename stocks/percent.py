@@ -48,7 +48,7 @@ for i in range(1, 100):
     income_per_month = round(income * income_rate / 12)
 
     for key in goal:
-        goal[key] = goal[key] * (1 + inflation / 12)
+        goal[key] = goal[key] * (1 + inflation)
         if achived[key] == 0 and income_per_month >= goal[key]:
             achived[key] = i
 
