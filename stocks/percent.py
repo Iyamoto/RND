@@ -17,7 +17,7 @@ print('Yearly investment:', add)
 
 # Chose strategy
 income_rate = 0.08  # 0.05 - Conservative, 0.07 - Normal, 0.09 - Aggressive
-inflation = 0.05
+inflation = 0.04
 
 # Goals
 goal = dict()
@@ -35,6 +35,7 @@ goal['style'] += 10000  # Restaurants, theaters
 goal['style'] += 10000  # Beauty
 
 goal['freedom'] = goal['style']
+goal['freedom'] += 100000
 
 achived = dict()
 achived['fin_security'] = 0
@@ -54,10 +55,15 @@ for i in range(1, 100):
     income_per_month = round(income * income_rate / 12)
 
     for key in goal:
-        goal[key] = goal[key] * (1 + inflation)
-        if achived[key] == 0 and income_per_month >= goal[key]:
-            achived[key] = i
-            age[key] = today.year + i - configs.settings.BEARTH_YEAR
+        if not achived[key]:
+            goal[key] = goal[key] * (1 + inflation)
+            if income_per_month >= goal[key]:
+                achived[key] = i
+                age[key] = today.year + i - configs.settings.BEARTH_YEAR
 
-print(json.dumps(achived, indent=4))
+    if achived['fin_security'] and achived['style'] and achived['freedom']:
+        break
+
+print(json.dumps(goal, indent=4))
+# print(json.dumps(achived, indent=4))
 print(json.dumps(age, indent=4))
