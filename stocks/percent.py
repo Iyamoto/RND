@@ -15,7 +15,7 @@ add = configs.settings.MONTHLY_INCOME * 12 * invest_rate
 print('Yearly investment:', add)
 
 # Chose strategy
-income_rate = 5  # 3 - Conservative, 5 - Normal, 7 - Aggressive
+income_rate = 0.05  # 0.03 - Conservative, 0.05 - Normal, 0.07 - Aggressive
 
 # Goals
 goal = dict()
@@ -37,9 +37,9 @@ print(json.dumps(goal, indent=4))
 
 income = start
 for i in range(30):
-    income = income * (100 + income_rate) / 100 + add
+    income += income * income_rate + add
+    income_per_month = round(income * income_rate / 12)
 
-    income_per_month = round(income * income_rate / (12 * 100))
     for key in goal:
         if achived[key] == 0 and income_per_month >= goal[key]:
             achived[key] = i
