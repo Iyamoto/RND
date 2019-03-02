@@ -24,9 +24,9 @@ goal['fin_security'] = 10000  # For the flat
 goal['fin_security'] += 30000  # For food
 goal['fin_security'] += 10000  # For transportation
 
-goal['style'] = 10000
+goal['style'] = goal['fin_security'] + 10000
 
-goal['freedom'] = 100000
+goal['freedom'] = goal['style'] + 100000
 
 achived = dict()
 achived['fin_security'] = 0
@@ -41,9 +41,7 @@ for i in range(30):
 
     income_per_month = round(income * income_rate / (12 * 100))
     for key in goal:
-        if achived['fin_security'] == 0 and income_per_month >= goal['fin_security']:
-            achived['fin_security'] = i
-        if achived['style'] == 0 and income_per_month >= (goal['style'] + goal['fin_security']):
-            achived['style'] = i
+        if achived[key] == 0 and income_per_month >= goal[key]:
+            achived[key] = i
 
 print(json.dumps(achived, indent=4))
