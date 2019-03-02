@@ -3,3 +3,4 @@ images
 data
 alphaconf.py
 stocker.py
+configs/settings.py
