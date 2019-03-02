@@ -16,7 +16,7 @@ add = configs.settings.MONTHLY_INCOME * 12 * invest_rate
 print('Yearly investment:', add)
 
 # Chose strategy
-income_rate = 0.09  # 0.05 - Conservative, 0.07 - Normal, 0.09 - Aggressive
+income_rate = 0.08  # 0.05 - Conservative, 0.07 - Normal, 0.09 - Aggressive
 inflation = 0.05
 
 # Goals
