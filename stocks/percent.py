@@ -1,6 +1,7 @@
 """Financial strategy"""
 
 import json
+from datetime import datetime
 import configs.settings
 
 # Add $ and rub
@@ -40,7 +41,12 @@ achived['fin_security'] = 0
 achived['style'] = 0
 achived['freedom'] = 0
 
+age = dict()
+
 print(json.dumps(goal, indent=4))
+
+today = datetime.today()
+print('Now', today.year)
 
 income = start
 for i in range(1, 100):
@@ -51,5 +57,7 @@ for i in range(1, 100):
         goal[key] = goal[key] * (1 + inflation)
         if achived[key] == 0 and income_per_month >= goal[key]:
             achived[key] = i
+            age[key] = today.year + i - configs.settings.BEARTH_YEAR
 
 print(json.dumps(achived, indent=4))
+print(json.dumps(age, indent=4))
