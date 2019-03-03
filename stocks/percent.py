@@ -18,11 +18,8 @@ inflation = 0.04
 # Prepare data
 data = dict()
 data['fin_security'] = dict()
-data['fin_security']['achived'] = 0
 data['style'] = dict()
-data['style']['achived'] = 0
 data['freedom'] = dict()
-data['freedom']['achived'] = 0
 
 # Goals
 data['fin_security']['goal'] = 11000  # For the flat
@@ -50,14 +47,14 @@ for i in range(1, 100):
     income_per_month = round(income * income_rate / 12)
 
     for key in data:
-        if not data[key]['achived']:
+        if not data[key].get('achieved'):
             data[key]['goal'] = round(data[key]['goal'] * (1 + inflation), 0)
             if income_per_month >= data[key]['goal']:
-                data[key]['achived'] = i
+                data[key]['achieved'] = i
                 data[key]['age'] = today.year + i - configs.settings.BEARTH_YEAR
                 data[key]['income'] = round(income, 0)
 
-    if data['fin_security']['achived'] and data['style']['achived'] and data['freedom']['achived']:
+    if data['fin_security'].get('achieved') and data['style'].get('achieved') and data['freedom'].get('achieved'):
         break
 
 print('Future')
